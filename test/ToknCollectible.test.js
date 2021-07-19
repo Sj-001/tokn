@@ -39,17 +39,18 @@ contract(ToknFactory, (accounts) => {
       assert.ok(toknCollectible);
     });
   });
-});
+  // });
 
-contract(ToknCollectible, (accounts) => {
-  let toknCollectible, auction, collectible;
-  before(async () => {
-    // console.log(toknCollectible);
-    toknCollectible = await ToknCollectible.new("colors", "COL");
-  });
+  // contract(ToknCollectible, (accounts) => {
+  //   let toknCollectible, auction, collectible;
+  // before(async () => {
+  // console.log(toknCollectible);
+  // toknCollectible = ToknCollectible.at(toknCollectible);
+  // });
 
   describe("create()", async () => {
     it("creates a collectible", async () => {
+      toknCollectible = await ToknCollectible.at(toknCollectible);
       collectible = await toknCollectible.create("My Song", "None", 5, {
         from: accounts[0],
       });
@@ -199,4 +200,3 @@ contract(ToknCollectible, (accounts) => {
     });
   });
 });
-// });
