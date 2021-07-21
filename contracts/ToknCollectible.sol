@@ -9,7 +9,7 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 contract ToknCollectible is ERC721{
   uint256 public  _collectibleID;
   uint256 public _collectibleCount;
-  uint public maxPrice;
+  // uint public maxPrice;
 
   // the original creator of NFT (artist)
   address payable public creator;

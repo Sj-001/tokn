@@ -8,9 +8,9 @@ contract ToknBidding is ToknCollectible{
   // uint256 collectibleID;
   // address payable creator;
   // address payable owner;
-
     mapping(uint256=> bool) public runningAuction;
   mapping(uint256=> address) public currentAuctionForTokn;
+  // mapping(uint256=> mapping(address=>bool)) public currentRunningAuction;
   mapping(address=> uint) public auctionMaxPrice;
   
   constructor(string memory name, string memory symbol) public ToknCollectible(name, symbol){
@@ -25,7 +25,8 @@ function startAuction(uint256 toknID, uint _maxPrice) public toknExists(toknID){
   // require(_exists(toknID));
   require(_isApprovedOrOwner(msg.sender, toknID));
   require(runningAuction[toknID] == false);
-  Auction newAuction = new Auction(payable(msg.sender), toknID);
+
+  Auction newAuction = new Auction(payable(msg.sender));
   // collectibleAuctions[toknID].push(address(newAuction));
   auctionMaxPrice[address(newAuction)] =_maxPrice*10**18;
   runningAuction[toknID] = true;
@@ -55,13 +56,13 @@ function endAuction(uint256 _toknID, uint256 commission) public toknExists(_tokn
   // require(_exists(_toknID));
   Auction currentAuction = Auction(currentAuctionForTokn[_toknID]);
   require(currentAuction.auctionState() != Auction.State.Ended); 
-  require(_isApprovedOrOwner(msg.sender, _toknID) && msg.sender == currentAuction.owner());
+  require(msg.sender == currentAuction.owner());
   
   currentAuction.finalizeAuction();
   _collectibleList[_toknID]._owner = currentAuction.highestBidder();
-  uint lastPrice = currentAuction.highestBid()/uint(10**18);
-  uint creatorCommission = lastPrice*commission/uint(100);
-  creator.transfer(creatorCommission*10**18); 
+  // uint lastPrice = currentAuction.highestBid()/uint(10**18);
+  // uint creatorCommission = ((currentAuction.highestBid()/uint(10**18))*commission/uint(100));
+  creator.transfer(((currentAuction.highestBid()/uint(10**18))*commission/uint(100))*10**18); 
   safeTransferFrom(msg.sender, currentAuction.highestBidder(), _toknID);
   runningAuction[_toknID] = false;
   delete currentAuctionForTokn[_toknID];

@@ -5,7 +5,7 @@ contract Auction{
     address payable public owner;
     // uint public startBlock;
     // uint public endBlock;
-    uint256 public collectibleId;
+    // uint256 public collectibleId;
 
     address payable[] public bidders;
     enum State {Started, Running, Ended, Cancelled}
@@ -18,11 +18,11 @@ contract Auction{
     
     
     // Assigning the msg.sender as the owner of the auction
-    constructor(address payable creator, uint256 toknId){
+    constructor(address payable creator){
         owner = creator;
         auctionState = State.Running;
         // startBlock = block.number;
-        collectibleId = toknId;
+        // collectibleId = toknId;
     }
     
        
