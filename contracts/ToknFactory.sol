@@ -1,13 +1,13 @@
 pragma solidity ^0.8.0;
-import './ToknCollectible.sol';
+import './ToknBidding.sol';
 
 contract ToknFactory{
   address payable deployer;
   uint256 songID;
-
+  // address artist;
 //store songs
  mapping(uint256=> Song) public songList;
- mapping(uint256=> ToknCollectible) public songNFT;
+ mapping(address=> address) public artistTokn;
 
 //model song object
 struct Song{
@@ -53,11 +53,11 @@ function uploadSong(string memory _albumCoverHash, string memory _audioHash, str
 
 // Creating an NFT of the song uploaded
 
-function createNFT(string memory name, string memory symbol, uint256 _songID) public{
+function createTokn(string memory name, string memory symbol, uint256 _songID) public{
   require(msg.sender == songList[_songID]._artist);
-  ToknCollectible newTokn = new ToknCollectible(name, symbol);
+  address newTokn = address(new ToknBidding(name, symbol));
   // ToknCollectible.Collectible memory newCollectible = newTokn.create(songList[_songID]._title, tokenURI, commission);
-  songNFT[_songID] = newTokn;
+  artistTokn[msg.sender] = newTokn;
 }
 
 }

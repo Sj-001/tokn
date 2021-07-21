@@ -9,7 +9,7 @@ require("chai").use(require("chai-as-promised")).should();
 contract(ToknFactory, (accounts) => {
   let toknFactory, song, toknCollectible;
   before(async () => {
-    toknFactory = await ToknFactory.new(accounts[0]);
+    toknFactory = await ToknFactory.deployed();
   });
   describe("uploadSong()", async () => {
     it("allows user to uplaod a song", async () => {
