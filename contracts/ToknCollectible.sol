@@ -46,10 +46,9 @@ constructor(string memory name, string memory symbol ) public ERC721(name, symbo
 //creates and mints NFT Tokn to user.
 //Takes as input _tokenURI: token data off chain, address of the _owner,collectible title
 
-modifier toknExists(uint256 toknID) {
-  require(_exists(toknID));
-  _;
-}
+// function toknExists(uint256 toknID) private{
+//   require(_exists(toknID));
+// }
 
 function create(string memory _title, string memory _tokenURI) public returns(Collectible memory){
     //increment collectible count
@@ -142,8 +141,9 @@ function create(string memory _title, string memory _tokenURI) public returns(Co
 // }
 
 //destroy function takes the tokenID of the NFT, then calls on openzeppelin's burn function.
-function destroy(uint256 toknID) public toknExists(toknID) returns(bool success) {
-  // require(_exists(toknID));
+function destroy(uint256 toknID) public  returns(bool success) {
+  require(_exists(toknID));
+  // toknExists(toknID);
   _burn(toknID);
   delete _collectibleList[toknID];
   return true;
