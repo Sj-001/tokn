@@ -18,7 +18,7 @@ contract ToknBidding is ToknCollectible{
     // creator = payable(_creator);
     // owner = payable(msg.sender);
   }
-function toknExists(uint256 toknID) private{
+function toknExists(uint256 toknID) private view{
   require(_exists(toknID));
 }
 
@@ -45,14 +45,14 @@ function bid(uint256 _toknID) public payable  returns(bool){
   
   // Auction currentAuction = currentAuctionForTokn[_toknID];
 
-  bool res = Auction(currentAuctionForTokn[_toknID]).placeBid{value: msg.value}(msg.sender);
+  Auction(currentAuctionForTokn[_toknID]).placeBid{value: msg.value}(msg.sender);
 
   // Finalizing the auction if the current bid reaches maximum price defines by the owner 
   if(msg.value >= auctionMaxPrice[address(currentAuctionForTokn[_toknID])]){
     runningAuction[_toknID] = false;
 
   }
-  return res;
+  
 }
 
 // Finalizing Auction and transferring the ownership to the buyer and sending the commision to the original creator
@@ -70,7 +70,7 @@ function endAuction(uint256 _toknID, uint256 commission) public {
   creator.transfer(((currentAuction.highestBid()/uint(10**18))*commission/uint(100))*10**18); 
   safeTransferFrom(msg.sender, currentAuction.highestBidder(), _toknID);
   runningAuction[_toknID] = false;
-  delete currentAuctionForTokn[_toknID];
+  // delete currentAuctionForTokn[_toknID];
 }
 
 //cancelling the auction
@@ -82,11 +82,11 @@ function cancelAuction(uint256 toknID) public {
   // Auction currentAuction = currentAuctionForTokn[toknID];
   Auction(currentAuctionForTokn[toknID]).cancelAuction(msg.sender);
   runningAuction[toknID] = false;
-  delete currentAuctionForTokn[toknID];
+  // delete currentAuctionForTokn[toknID];
 }
 
 // setting terminal price for auction
-function setMaxPrice(uint256 toknID, uint price) public  returns(bool){
+function setMaxPrice(uint256 toknID, uint price) public {
   toknExists(toknID);
   // require(_exists(toknID));
   require(msg.sender == _collectibleList[toknID]._owner);
@@ -94,7 +94,6 @@ function setMaxPrice(uint256 toknID, uint price) public  returns(bool){
  
   // Auction currentAuction = currentAuctionForTokn[toknID];
   auctionMaxPrice[currentAuctionForTokn[toknID]] = price*10**18;
-  return true;
 }
 
 }

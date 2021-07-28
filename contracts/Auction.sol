@@ -39,10 +39,10 @@ contract Auction{
     }
     
     // Placing bid on the auction
-    function placeBid(address sender) public payable returns(bool){
+    function placeBid(address sender) public payable{
         require(sender != owner);
         require(auctionState == State.Running);
-        require(msg.value > 0.001 ether);  
+        // require(msg.value > 0.001 ether);  
         if(bids[sender] == 0){
           bidders.push(payable(sender));
         }
@@ -60,7 +60,7 @@ contract Auction{
         highestBidder = payable(sender);
         
         
-        return true;
+      
     }
     
     // Finalizing the auction and declaring teh winner
