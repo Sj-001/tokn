@@ -1,5 +1,5 @@
 pragma solidity ^0.8.0;
-import './ToknBidding.sol';
+import "./ToknBidding.sol";
 
 contract ToknFactory{
   address payable deployer;
@@ -27,7 +27,7 @@ struct Song{
    string _audioHash
  );
 
-constructor(address payable _deployer) public{
+constructor(address payable _deployer) {
   deployer = _deployer;
   songID = 0;
 }
@@ -55,9 +55,9 @@ function uploadSong(string memory _albumCoverHash, string memory _audioHash, str
 
 function createTokn(string memory name, string memory symbol, uint256 _songID) public{
   require(msg.sender == songList[_songID]._artist);
-  address newTokn = address(new ToknBidding(name, symbol));
+  // address newTokn = address(new ToknBidding(name, symbol));
   // ToknCollectible.Collectible memory newCollectible = newTokn.create(songList[_songID]._title, tokenURI, commission);
-  artistTokn[msg.sender] = newTokn;
+  artistTokn[msg.sender] = address(new ToknBidding(name, symbol));
 }
 
 }

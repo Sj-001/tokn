@@ -33,13 +33,13 @@ contract ToknCollectible is ERC721{
   );
 
 
-constructor(string memory name, string memory symbol ) public ERC721(name, symbol){
+constructor(string memory name, string memory symbol ) ERC721(name, symbol){
     _collectibleID = 0;
     _collectibleCount = 0;
 }
 
 
-function create(string memory _title, string memory _tokenURI) public returns(Collectible memory){
+function create(string memory _title, string memory _tokenURI) public returns(uint256){
     //increment collectible count
       _collectibleID++;
       _collectibleCount++;
@@ -56,7 +56,7 @@ function create(string memory _title, string memory _tokenURI) public returns(Co
 
   // Assiging msg.sender as the original creator 
   creator = payable(msg.sender);
-  return newCollectible;
+  return newCollectible._collectibleID;
 
 }
 

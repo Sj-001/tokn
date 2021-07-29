@@ -13,7 +13,7 @@ contract ToknBidding is ToknCollectible{
   // mapping(uint256=> mapping(address=>bool)) public currentRunningAuction;
   mapping(uint=> uint) public toknMaxPrice;
   
-  constructor(string memory name, string memory symbol) public ToknCollectible(name, symbol){
+  constructor(string memory name, string memory symbol) ToknCollectible(name, symbol){
     // collectibleID = _toknID;
     // creator = payable(_creator);
     // owner = payable(msg.sender);
@@ -26,14 +26,14 @@ function toknExists(uint256 toknID) private view{
 function startAuction(uint256 toknID, uint _maxPrice) public {
   toknExists(toknID);
   // require(_exists(toknID));
-  require(_isApprovedOrOwner(msg.sender, toknID));
-  require(runningAuction[toknID] == false);
+  require(_isApprovedOrOwner(msg.sender, toknID) && runningAuction[toknID] == false);
+  // require(runningAuction[toknID] == false);
 
-  address newAuction = address(new Auction(payable(msg.sender)));
+  // address newAuction = address(new Auction(payable(msg.sender)));
   // collectibleAuctions[toknID].push(address(newAuction));
   toknMaxPrice[toknID] =_maxPrice*10**18;
   runningAuction[toknID] = true;
-  currentAuctionForTokn[toknID] = newAuction;
+  currentAuctionForTokn[toknID] = address(new Auction(payable(msg.sender)));
 }
 
 
@@ -60,8 +60,8 @@ function endAuction(uint256 _toknID, uint256 commission) public {
   toknExists(_toknID);
   // require(_exists(_toknID));
   Auction currentAuction = Auction(currentAuctionForTokn[_toknID]);
-  require(currentAuction.auctionState() != Auction.State.Ended); 
-  require(msg.sender == currentAuction.owner());
+  require(currentAuction.auctionState() != Auction.State.Ended && msg.sender == currentAuction.owner()); 
+  // require(msg.sender == currentAuction.owner());
   
   currentAuction.finalizeAuction();
   _collectibleList[_toknID]._owner = currentAuction.highestBidder();
@@ -77,8 +77,8 @@ function endAuction(uint256 _toknID, uint256 commission) public {
 function cancelAuction(uint256 toknID) public {
   toknExists(toknID);
   // require(_exists(toknID));
-  require(msg.sender == _collectibleList[toknID]._owner);
-  require(runningAuction[toknID]);
+  require(msg.sender == _collectibleList[toknID]._owner && runningAuction[toknID]);
+  // require(runningAuction[toknID]);
   // Auction currentAuction = currentAuctionForTokn[toknID];
   Auction(currentAuctionForTokn[toknID]).cancelAuction(msg.sender);
   runningAuction[toknID] = false;
@@ -89,8 +89,8 @@ function cancelAuction(uint256 toknID) public {
 function setMaxPrice(uint256 toknID, uint price) public {
   toknExists(toknID);
   // require(_exists(toknID));
-  require(msg.sender == _collectibleList[toknID]._owner);
-  require(runningAuction[toknID]);
+  require(msg.sender == _collectibleList[toknID]._owner && runningAuction[toknID]);
+  // require(runningAuction[toknID]);
  
   // Auction currentAuction = currentAuctionForTokn[toknID];
   toknMaxPrice[toknID] = price*10**18;
