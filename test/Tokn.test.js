@@ -1,13 +1,13 @@
 const { assert } = require("chai");
 
 const ToknFactory = artifacts.require("ToknFactory");
-const ToknCollectible = artifacts.require("ToknCollectible");
+const ToknBidding = artifacts.require("ToknBidding");
 const Auction = artifacts.require("Auction");
 
 require("chai").use(require("chai-as-promised")).should();
 
 contract(ToknFactory, (accounts) => {
-  let toknFactory, song, toknCollectible;
+  let toknFactory, song, tokn, collectible;
   before(async () => {
     toknFactory = await ToknFactory.deployed();
   });
@@ -23,73 +23,73 @@ contract(ToknFactory, (accounts) => {
       // assert.ok(toknFactory.address);
     });
   });
-  describe("createNFT()", async () => {
-    it("doesn't allow anyone else other than artist to create NFT", async () => {
-      await toknFactory.createNFT("colors", "COL", song._songID, {
+  describe("createTokn()", async () => {
+    it("doesn't allow anyone else other than artist to create Tokn", async () => {
+      await toknFactory.createTokn("colors", "COL", song._songID, {
         from: accounts[1],
       }).should.be.rejected;
     });
 
-    it("allows artist to create NFT for their song", async () => {
-      await toknFactory.createNFT("colors", "COL", song._songID, {
+    it("allows artist to create Tokn for their song", async () => {
+      await toknFactory.createTokn("colors", "COL", song._songID, {
         from: accounts[0],
       });
-      toknCollectible = await toknFactory.songNFT(song._songID);
-      // console.log(toknCollectible);
-      assert.ok(toknCollectible);
+      tokn = await toknFactory.artistTokn(accounts[0]);
+      // console.log(tokn);
+      assert.ok(tokn);
+      // tokn = await ToknBidding.at(tokn);
+      // console.log(tokn);
     });
   });
 
   describe("create()", async () => {
     it("creates a collectible", async () => {
-      toknCollectible = await ToknCollectible.at(toknCollectible);
-      collectible = await toknCollectible.create("My Song", "None", {
+      tokn = await ToknBidding.at(tokn);
+      collectible = await tokn.create("My Song", "None", {
         from: accounts[0],
       });
-      collectible = await toknCollectible._collectibleList(1);
+      // console.log(collectibleID);
+      collectible = await tokn._collectibleList(1);
       // console.log(newCollectible);
       assert.equal(
         collectible._title,
         "My Song",
         "Creates an NFT for given song title"
       );
+      // assert.ok(collectibleID);
     });
   });
 
   describe("startAuction()", async () => {
     it("doesn't allow anyone else other than owner to start the auction", async () => {
-      await toknCollectible.startAuction(collectible._collectibleID, 10, {
+      await tokn.startAuction(collectible._collectibleID, 10, {
         from: accounts[1],
       }).should.be.rejected;
     });
 
     it("starts an auction", async () => {
-      await toknCollectible.startAuction(collectible._collectibleID, 5, {
+      await tokn.startAuction(collectible._collectibleID, 5, {
         from: accounts[0],
       });
-      auction = await toknCollectible.currentAuctionForTokn(
-        collectible._collectibleID
-      );
+      auction = await tokn.currentAuctionForTokn(collectible._collectibleID);
       auction = await Auction.at(auction);
       // auction = auctions[0];
       assert.ok(auction, "Deploys an auction for created NFT");
-      let res = await toknCollectible.runningAuction(
-        collectible._collectibleID
-      );
+      let res = await tokn.runningAuction(collectible._collectibleID);
       assert.equal(res, true, "Auction running");
     });
   });
 
   describe("bid()", async () => {
     it("doesn't allow owner to place the bid", async () => {
-      await toknCollectible.bid(collectible._collectibleID, {
+      await tokn.bid(collectible._collectibleID, {
         value: 2e18,
         from: accounts[0],
       }).should.be.rejected;
     });
 
     it("allows user to place bid on a particular collectible", async () => {
-      await toknCollectible.bid(collectible._collectibleID, {
+      await tokn.bid(collectible._collectibleID, {
         value: 2e18,
         from: accounts[1],
       });
@@ -101,32 +101,28 @@ contract(ToknFactory, (accounts) => {
     });
 
     it("stops the auction when bid exceeds maxPrice", async () => {
-      await toknCollectible.bid(collectible._collectibleID, {
+      await tokn.bid(collectible._collectibleID, {
         value: 5e18,
         from: accounts[2],
       });
 
-      let res = await toknCollectible.runningAuction(
-        collectible._collectibleID
-      );
+      let res = await tokn.runningAuction(collectible._collectibleID);
       assert.equal(res, false, "Terminates the auction");
     });
   });
 
   describe("endAuction()", async () => {
     it("doesn't allow anyone else other than owner to end the auction", async () => {
-      await toknCollectible.endAuction(collectible._collectibleID, 5, {
+      await tokn.endAuction(collectible._collectibleID, 5, {
         from: accounts[1],
       }).should.be.rejected;
     });
 
     it("finalizes the auction", async () => {
-      await toknCollectible.endAuction(collectible._collectibleID, 5, {
+      await tokn.endAuction(collectible._collectibleID, 5, {
         from: accounts[0],
       });
-      collectible = await toknCollectible._collectibleList(
-        collectible._collectibleID
-      );
+      collectible = await tokn._collectibleList(collectible._collectibleID);
       let owner = collectible._owner;
       assert.equal(
         owner,
@@ -138,48 +134,42 @@ contract(ToknFactory, (accounts) => {
 
   describe("setMaxPrice()", async () => {
     it("allows owner to manipulate maximum price", async () => {
-      await toknCollectible.startAuction(collectible._collectibleID, 6, {
+      await tokn.startAuction(collectible._collectibleID, 6, {
         from: accounts[2],
       });
-      auction = await toknCollectible.currentAuctionForTokn(
-        collectible._collectibleID
-      );
-      let price = await toknCollectible.auctionMaxPrice(auction);
+      auction = await tokn.currentAuctionForTokn(collectible._collectibleID);
+      let price = await tokn.toknMaxPrice(collectible._collectibleID);
       assert.equal(price, 6e18, "Initial max price is correct");
-      await toknCollectible.setMaxPrice(collectible._collectibleID, 10, {
+      await tokn.setMaxPrice(collectible._collectibleID, 10, {
         from: accounts[2],
       });
-      price = await toknCollectible.auctionMaxPrice(auction);
+      price = await tokn.toknMaxPrice(collectible._collectibleID);
       assert.equal(price, 10e18, "New max price is correct");
     });
   });
 
   describe("cancelAuction()", async () => {
     it("doesn't allow anyone else other than owner to cancel the auction", async () => {
-      await toknCollectible.cancelAuction(collectible._collectibleID, {
+      await tokn.cancelAuction(collectible._collectibleID, {
         from: accounts[1],
       }).should.be.rejected;
     });
 
     it("cancels the auction", async () => {
-      await toknCollectible.cancelAuction(collectible._collectibleID, {
+      await tokn.cancelAuction(collectible._collectibleID, {
         from: accounts[2],
       });
-      let res = await toknCollectible.runningAuction(
-        collectible._collectibleID
-      );
+      let res = await tokn.runningAuction(collectible._collectibleID);
       assert.equal(res, false, "Cancels the auction");
     });
   });
 
   describe("destroy()", async () => {
     it("destroys the collectible", async () => {
-      await toknCollectible.destroy(collectible._collectibleID, {
+      await tokn.destroy(collectible._collectibleID, {
         from: accounts[2],
       });
-      let res = await toknCollectible._collectibleList(
-        collectible._collectibleID
-      );
+      let res = await tokn._collectibleList(collectible._collectibleID);
       // console.log(res);
       assert.equal(
         res._owner,
