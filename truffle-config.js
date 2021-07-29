@@ -23,7 +23,7 @@
 //
 // const fs = require('fs');
 // const mnemonic = fs.readFileSync(".secret").toString().trim();
-
+const HDWalletProvider = require("@truffle/hdwallet-provider");
 module.exports = {
   /**
    * Networks define how you connect to your ethereum client and let you set the
@@ -46,6 +46,20 @@ module.exports = {
       host: "127.0.0.1", // Localhost (default: none)
       port: 7545, // Standard Ethereum port (default: none)
       network_id: "*", // Any network (default: none)
+    },
+    polygon: {
+      provider: () =>
+        new HDWalletProvider({
+          mnemonic: {
+            phrase:
+              "faith tip you swarm body skull credit sort eager pass stone tent",
+          },
+          providerOrUrl: "https://rpc-mumbai.matic.today",
+        }),
+      network_id: 80001,
+      confirmations: 2,
+      timeoutBlocks: 200,
+      skipDryRun: true,
     },
     // Another network with more advanced options...
     // advanced: {

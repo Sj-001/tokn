@@ -38,7 +38,7 @@ function startAuction(uint256 toknID, uint _maxPrice) public {
 
 
 // Placeing Bid
-function bid(uint256 _toknID) public payable  returns(bool){
+function bid(uint256 _toknID) public payable{
   toknExists(_toknID);
   // require(_exists(_toknID));
   require(runningAuction[_toknID]);
