@@ -1,5 +1,5 @@
 pragma solidity ^0.8.0;
-import "./ToknBidding.sol";
+import './ToknBidding.sol';
 
 contract ToknFactory{
   address payable deployer;

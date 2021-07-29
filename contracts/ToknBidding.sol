@@ -11,7 +11,7 @@ contract ToknBidding is ToknCollectible{
     mapping(uint256=> bool) public runningAuction;
   mapping(uint256=> address) public currentAuctionForTokn;
   // mapping(uint256=> mapping(address=>bool)) public currentRunningAuction;
-  mapping(address=> uint) public auctionMaxPrice;
+  mapping(uint=> uint) public toknMaxPrice;
   
   constructor(string memory name, string memory symbol) public ToknCollectible(name, symbol){
     // collectibleID = _toknID;
@@ -31,7 +31,7 @@ function startAuction(uint256 toknID, uint _maxPrice) public {
 
   address newAuction = address(new Auction(payable(msg.sender)));
   // collectibleAuctions[toknID].push(address(newAuction));
-  auctionMaxPrice[newAuction] =_maxPrice*10**18;
+  toknMaxPrice[toknID] =_maxPrice*10**18;
   runningAuction[toknID] = true;
   currentAuctionForTokn[toknID] = newAuction;
 }
@@ -48,7 +48,7 @@ function bid(uint256 _toknID) public payable{
   Auction(currentAuctionForTokn[_toknID]).placeBid{value: msg.value}(msg.sender);
 
   // Finalizing the auction if the current bid reaches maximum price defines by the owner 
-  if(msg.value >= auctionMaxPrice[address(currentAuctionForTokn[_toknID])]){
+  if(msg.value >= toknMaxPrice[_toknID]){
     runningAuction[_toknID] = false;
 
   }
@@ -93,7 +93,7 @@ function setMaxPrice(uint256 toknID, uint price) public {
   require(runningAuction[toknID]);
  
   // Auction currentAuction = currentAuctionForTokn[toknID];
-  auctionMaxPrice[currentAuctionForTokn[toknID]] = price*10**18;
+  toknMaxPrice[toknID] = price*10**18;
 }
 
 }
